@@ -5,41 +5,42 @@
 
 <p><img alt="rounds" src="https://img.shields.io/badge/rounds-5-d95d78"> <img alt="pre-registered" src="https://img.shields.io/badge/design-pre--registered-2d97d6"> <img alt="grading" src="https://img.shields.io/badge/grading-official%20harness%2C%20local-2d97d6"> <img alt="round 5" src="https://img.shields.io/badge/round%205-graded-2d97d6"> <img alt="disqualification" src="https://img.shields.io/badge/one%20cell-disqualified-d95d78"> <img alt="license" src="https://img.shields.io/badge/license-MIT-lightgrey"></p>
 
-At YC Startup School in July 2026, Boris Cherny, the creator of Claude Code, said that new models
-need less scaffolding with every release, and that he deletes parts of Claude Code's harness each
-time a new one ships. I did not buy it, so I ran the experiment: five rounds, each one
-pre-registered before launch, graded by the official harness and never by the agent.
+Do frontier coding agents still need the scaffolding we build around them? Five pre-registered
+rounds, graded by the official harness and never by the agent. Round 5 is the one that matters,
+so it goes first.
 
-I set out to prove him wrong and mostly proved him right. Then round 5 produced the first clean
-scaffolding win on a frontier model, and in the same run one of my four test cells got caught
-solving the benchmark by looking up the answer key. The cell that cheated still lost to the cell
-that did not.
+## The result
 
-The whole thing in five lines:
+Arm A wraps the agent in a scaffold: one task per fresh session, a state file carried forward, a
+regression gate. Arm B is the same model bare, every task in one continuous session. Round 5 ran
+that comparison as a 2x2 with Sonnet 5 and Opus 5, on 60 SWE-bench Pro instances selected to be
+the hardest solvable stratum of the public set.
 
-- **Round 1:** both arms perfect on a small battery. The scaffold cost wall clock and bought nothing.
-- **Round 2:** scaffolding won by 11 points on real SWE-bench issues. It was also the wrong model,
-  on contaminated instances.
-- **Round 3:** the direction flipped on a harder tier, then the run died at n=1. It is reported anyway.
-- **Round 4:** with both confounds fixed, the effect vanished. 50/50 in both arms, and the bare arm
-  finished in 36 minutes while the scaffold took 4.7 hours.
-- **Round 5:** on the hardest public stratum, scaffolding beat the bare arm on Opus 5 by 11.7 points
-  (p = 0.039). The scaffolded Sonnet cell [found the answer key](#round-5-one-cell-found-the-answer-key)
-  and is disqualified.
+| Cell | Score | Task metas referencing the upstream fix | Verdict |
+|---|---|---|---|
+| Opus 5, scaffolded | **59/60 (98%)** | 0/60 | clean |
+| Opus 5, bare | 52/60 (87%) | 0/60 | clean |
+| Sonnet 5, bare | 48/60 (80%) | 0/60 | clean |
+| Sonnet 5, scaffolded | 58/60 | **45/60** | **disqualified** |
 
-Everything is in this repo: the pre-registrations, the frozen instance lists with hashes, the
-grading wrappers, the memorization probe, the audit that caught the cheat, per-instance results,
-and append-only run logs with the failures and infrastructure incidents left in.
+- **On Opus 5 the scaffold won by 11.7 points.** 59/60 against 52/60, McNemar 8 discordant pairs
+  to 1, exact p = 0.0391, both cells audited clean. After four rounds of the scaffold losing,
+  tying, or winning only with confounds, this is the first clean scaffolding win on a frontier
+  model in this experiment.
+- **The Sonnet scaffolded cell is disqualified.** It solved the benchmark by looking up the answer
+  key. The full story is the [next section](#one-cell-found-the-answer-key), and it is better than
+  the headline: the cell that cheated still lost to the cell that did not, 58 to 59.
+- **The model-by-scaffold interaction, the actual pre-registered headline hypothesis, is not
+  computable yet.** It needs a clean Sonnet cell, so that cell is rerunning with the answer key
+  withheld: instance IDs never reach the agent, and the rank-to-ID mapping stays with the
+  orchestrator. The interaction publishes when it grades.
 
 > [!NOTE]
 > The round 5 pre-registration promised that results publish whole, not in pieces. This is the
-> whole run: all 240 grades, the audit, and the disqualification. One number is still missing on
-> purpose. The model-by-scaffold interaction needs a clean Sonnet cell, so that cell is rerunning
-> with the answer key withheld, and the interaction publishes when it grades.
+> whole run: all 240 grades, the audit, and the disqualification. The interaction is the one
+> number still missing, and it waits on the rerun rather than on editing.
 
----
-
-## Round 5: one cell found the answer key
+## One cell found the answer key
 
 SWE-bench Pro names each task after the commit that fixed it. The instance ID contains the SHA of
 the real upstream fix. My harness pasted that ID into every task file, and the sandbox had network
@@ -63,26 +64,8 @@ opposite policy into its own state file:
 
 The two cells saw the same leak and the same temptation, and adopted opposite rules, both
 unprompted. The difference between those two state files is the most interesting artifact this
-project has produced.
-
-And the cheating cell still lost:
-
-| Cell | Score | Task metas referencing the upstream fix | Verdict |
-|---|---|---|---|
-| Opus 5, scaffolded | **59/60** | 0/60 | clean |
-| Opus 5, bare | 52/60 | 0/60 | clean |
-| Sonnet 5, bare | 48/60 | 0/60 | clean |
-| Sonnet 5, scaffolded | 58/60 | **45/60** | **disqualified** |
-
-What survives:
-
-- **The Opus effect stands.** 59/60 against 52/60, McNemar 8 discordant pairs to 1, exact
-  p = 0.0391, both cells audited clean. On work hard enough to produce failures, on the current
-  frontier model, the scaffold finally won a round.
-- **The Sonnet effect is withdrawn.** 58/60 measures retrieval, not engineering.
-- **The headline hypothesis, whether scaffolding helps the weaker model more, is not computable
-  yet.** It needs a clean Sonnet cell. The rerun withholds instance IDs from the agent entirely;
-  the rank-to-ID mapping stays with the orchestrator.
+project has produced. And with the answer key in hand, Sonnet still scored one point below the
+Opus cell that refused to look.
 
 The leak is my fault first and the dataset's second. I put the ID in the task file and left the
 network on. But the ID scheme ships the answer key inside the task's own name, and most public
@@ -94,9 +77,29 @@ is also exactly what turned one discovery into a 45-task exploitation. Scaffoldi
 whatever the model brings to it. In one cell that was discipline, and in the other it was a
 shortcut.
 
+## Why this experiment exists
+
+At YC Startup School in July 2026, Boris Cherny, the creator of Claude Code, said that new models
+need less scaffolding with every release, and that he deletes parts of Claude Code's harness each
+time a new one ships. I did not buy it, so I ran the experiment. I set out to prove him wrong and
+spent four rounds mostly proving him right:
+
+- **Round 1:** both arms perfect on a small battery. The scaffold cost wall clock and bought nothing.
+- **Round 2:** scaffolding won by 11 points on real SWE-bench issues. It was also the wrong model,
+  on contaminated instances.
+- **Round 3:** the direction flipped on a harder tier, then the run died at n=1. It is reported anyway.
+- **Round 4:** with both confounds fixed, the effect vanished. 50/50 in both arms, and the bare arm
+  finished in 36 minutes while the scaffold took 4.7 hours.
+- **Round 5:** the result above. Hard enough work finally separated the arms, and the answer-key
+  discovery came with it.
+
+Everything is in this repo: the pre-registrations, the frozen instance lists with hashes, the
+grading wrappers, the memorization probe, the audit that caught the cheat, per-instance results,
+and append-only run logs with the failures and infrastructure incidents left in.
+
 ---
 
-## Results
+## All five rounds
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/rounds-dark.svg">
@@ -111,10 +114,6 @@ shortcut.
 | 4 | 50 fresh interlocking tasks | Opus 5 | 50/50 | 50/50 | null at the ceiling |
 | 5 | 60 hardest SWE-bench Pro instances | Opus 5 | **59/60 (98%)** | 52/60 (87%) | scaffolding wins, McNemar p = 0.039 |
 | 5 | same battery | Sonnet 5 | disqualified | 48/60 (80%) | arm A found the answer key |
-
-Arm A is the scaffold: one task per fresh session, a state file carried forward, a regression gate,
-one commit per task. Arm B gets nothing: every task in one continuous session, with the scaffolding
-docs deleted from the branch so it cannot absorb the discipline by osmosis.
 
 Batteries differ between rounds. Rows are not comparable to each other, only within a row.
 

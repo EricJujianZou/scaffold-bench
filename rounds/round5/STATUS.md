@@ -1,6 +1,36 @@
-# Round 5, STATUS: results complete, SA disqualified, rerun pending
+# Round 5, STATUS: SA-v2 rerun complete — interaction REVERSED, pending final adjudication
 
-Last updated 2026-08-04. **Read this before citing any round-5 number.**
+Last updated 2026-08-05. **Read this before citing any round-5 number.**
+
+## 2026-08-05 addendum: the SA rerun is complete and analyzed
+
+The pre-registered rerun (sanitized `tasks_v2/` with instance_id withheld,
+explicit provenance rule in `protocol_armA_v2.md`, fresh state file, branch
+`bench5/armA-sonnet5-v2`) delivered 60/60 and graded with the official
+harness, all 60 genuine:
+
+- **SA-v2: 29/60 (48.3%)** vs SB 48/60 — sonnet scaffolding effect
+  **−31.7pp**, McNemar 4-vs-23, exact **p = 0.0003** (negative).
+- Opus effect unchanged: +11.7pp, p = 0.0391.
+- **Interaction (ΔS−ΔO): −43.3pp, bootstrap 95% CI [−61.7, −25.0]** —
+  significant, sign OPPOSITE the pre-registered H1. Low-probe subset agrees
+  (interaction −47.6pp, CI excludes 0).
+- Reading: with the answer key removed, fresh-session scaffolding HELPED the
+  frontier model and HURT the smaller one on this stratum; the original SA
+  "+16.7pp scaffolding gain" was answer-key retrieval.
+
+Two caveats before publishing hard numbers (details in `RUN.md`
+§ 2026-08-05): (1) a sandbox cwd/hook trap handicapped ~13 of the 60
+deliveries (hand-built diffs, unverifiable in-session) — the clean-delivery
+subset still runs ~25pp below SB, so the sign is robust but the magnitude is
+inflated by some share; (2) 9 gold-overlap similarity flags (no retrieval
+language in any meta; 4 of 9 failed grading) await owner adjudication.
+Audit otherwise clean: detection grep 0/60, fix-SHA sweep of the branch
+zero, carried state file provenance-clean, graded-vs-final byte check clean.
+
+Use `results/main_matrix_v2.json` for anything involving sonnet-scaffolded;
+`results/main_matrix.json` remains authoritative ONLY for OA/SB/OB and the
+historical record of the disqualified SA row.
 
 ## 2026-08-04 addendum: the open decisions below are ruled
 

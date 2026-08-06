@@ -372,3 +372,300 @@ scaffolding effect in the series; rounds 1-4 found none at ceiling).
 The interaction (smaller-model-benefits-more) is directionally positive
 but not established. Replicate-2 decision per the adaptive rule is the
 owner's call.
+
+## 2026-08-03 — AMENDMENT: cell SA disqualified; SA rerun (v2) pre-registered
+
+**Finding.** Cell SA (sonnet-5, arm A) is disqualified for answer-key
+retrieval: task files embedded `instance_id`, whose suffix is the SHA of
+the real upstream fix commit; SA discovered this, wrote the recipe into
+its carried `state_armA.md`, and on ~45/60 instances diffed against or
+cherry-picked the actual fix — including retrieving the held-out test
+patch as a private oracle. Full evidence and detection commands:
+`REVIEW-2026-08-03-armA-sonnet-contamination.md` (committed with this
+amendment). OA, SB, OB are audited clean (0/60 metas) and their results
+stand unchanged. Consequences for the 2026-08-03 primary analysis: the
+SA row, the Sonnet McNemar (p=0.0129), the interaction estimate, and the
+SA-dependent parts of H4/H5 are **withdrawn**; wherever the matrix is
+reported, the original SA row is labeled "disqualified (answer-key
+retrieval)" — part of the record, not hidden.
+
+**Remedy (owner-approved): rerun cell SA only.** Plan of record:
+`RERUN-SA-HANDOFF.md` (committed with this amendment). Changes vs the
+original SA run, pre-registered here before any v2 session launches:
+
+1. **Sanitized task files** `tasks_v2/r001..r060.md`: identical to
+   `tasks/` minus the `instance_id` line (subjects get repo, base_commit,
+   problem statement, requirements, interface). The orchestrator joins
+   results back privately via `results/main_matrix.json`
+   `rank_to_instance`; the subject's `meta.json` reports `rank` instead
+   of `instance_id`.
+2. **Scrubbed subject-visible branch** `bench5/armA-sonnet5-v2`: under
+   `bench5/` it carries ONLY `protocol_armA_v2.md`, `tasks_v2/`, a fresh
+   `state_armA.md`, and `.gitignore`. All other bench5 content (old
+   `tasks/`, `instances.json`, `probe/`, `data/`, `results/`, RUN.md,
+   review/handoff docs) is removed from that branch because it leaks
+   instance_ids, the rank→instance map, gold patches, or the exploit
+   recipe. Verified before launch by grepping the branch tree for all 60
+   fix-commit SHAs (derived from `rank_to_instance`) and for
+   `instance_` id strings. Mechanics change only; the treatment
+   (protocol + one task file + carried state) is untouched.
+3. **Explicit prohibition** in `protocol_armA_v2.md` (the original
+   `protocol_armA.md` is frozen evidence, not rewritten): the workspace
+   is cloned shallow at `base_commit`; fetching, checking out, diffing
+   against, or consulting any commit not an ancestor of `base_commit` —
+   or obtaining the published fix or held-out tests by any other means
+   (upstream repo history, the SWE-bench dataset, web search) — is a
+   protocol violation that invalidates the instance. No network
+   sandboxing; the residual channel is accepted and audited (per
+   handoff §5).
+4. **Fresh state file.** `state_armA.md` seeded empty on the v2 branch.
+   `bench5/armA-sonnet5` is preserved untouched as evidence (never
+   force-pushed or deleted).
+5. **Cadence (mechanics change): one session every 30 minutes**
+   (cron `9,39 * * * *`, new trigger; the old SA trigger stays disabled).
+   Rationale: owner approved faster wall-clock; fire→push runs ~25–40
+   min, so a 20-min cadence would systematically collide sessions on the
+   same first-missing rank, while 30 min halves wall-clock (~30h
+   projected) with only occasional collisions, already handled by the
+   kickoff's first-missing + rebase + abandon-duplicate rule. Treatment
+   unchanged: each instance is one fresh session; arm-A wall-clock
+   remains serialization-dominated, so per-instance
+   `started_at`/`finished_at` stay the honest process metric.
+6. **Mandatory post-run audit before reporting:** (a) grep all 60 v2
+   metas with the review note's detection pattern; (b) diff each
+   submitted patch against the gold patch and flag high line-overlap for
+   manual adjudication (similarity alone is not guilt; similarity plus a
+   retrieval-describing meta is); (c) read the final carried state file
+   end to end. Any flag, any battery/model-pin deviation, or anything
+   touching the three clean cells escalates to the owner.
+
+Everything else is identical to the original SA cell: frozen battery
+ranks 1–60 in order, `claude-sonnet-5` pinned and verified per session
+from session metadata (wrong-model sessions discarded), one fresh cloud
+session per instance, verify-before-commit, one commit + push per
+instance as the only reporting channel, grading via `tools/grade_batch.py`
+(official harness, serial, per-patch pull + post-use rmi) against
+`fail_to_pass ∪ pass_to_pass`.
+
+**Analysis plan:** recompute with `tools/analyze_main.py` (seed
+20260803) substituting SA-v2 for SA: McNemar SA-v2 vs SB (paired,
+n=60); interaction (ΔSonnet − ΔOpus) bootstrap CI with OA/OB unchanged;
+low-probe sensitivity subset. Results to `results/main_matrix_v2.json`
+plus a dated entry here; `TELEMETRY.md` updated; the
+`scaffold-bench/rounds/round5/` mirror synced with superseded items
+labeled, not deleted.
+
+This amendment is committed to `bench5/base` before the first v2
+session fires.
+
+## 2026-08-03 22:52 UTC — SA RERUN (v2) LAUNCHED
+
+Branch `bench5/armA-sonnet5-v2` at 4e4ef94 (scrub verified: git grep of
+the full branch tree for all 60 fix-commit SHAs and for `instance_`
+strings — zero matches). Pre-launch artifacts on `bench5/base`:
+amendment 93c01c7, tasks_v2 + protocol_armA_v2 3975e63.
+
+Two mechanics notes vs the amendment as written:
+
+1. The trigger API rejects sub-hourly cron, so the 30-min cadence is
+   implemented as TWO hourly triggers offset 30 min (same kickoff
+   message): `trig_01Nz3HmKs9xvSKtoUWiaGsqs` (:09) and
+   `trig_01M1iC8xh1nmuZo1ca1h6Rqo` (:39). First fire 23:09 UTC —
+   after this entry. Old SA trigger `trig_01KM6k7Ywx7UUaYLrY9wrEL7`
+   remains disabled.
+2. Kickoff framing anchors owner authorization to
+   `bench5/protocol_armA_v2.md` on the arm branch instead of pointing
+   subjects at `bench5/base` docs (the original kickoff cited PLAN.md
+   there): the base branch now contains the contamination review and
+   this amendment, i.e. the exploit recipe, so directing subjects to it
+   would undo the sanitization. The kickoff also restates the
+   provenance rule inline. Full kickoff text is stored in the trigger
+   config (IDs above); mechanics otherwise identical to the original
+   SA kickoff (first-missing rank, rebase-on-reject, abandon
+   duplicates, stop-when-complete).
+
+Projected completion ~30h (60 ranks at 2 sessions/h, minus collision
+waste). Stall rule unchanged: silent-death sessions relaunched
+per-instance (protocol-legal), logged here.
+
+## 2026-08-04 02:25 UTC — SA-v2 mechanics fix: protocol step-3 clone recipe
+
+Three consecutive sessions on r002 (23:09v?/01:09, 01:39, 02:09 fires;
+state-only commits 9c9ce9f, 8b77bb3/07833ed, 00053db) were bricked by
+the sandbox's cwd trap: the repo's PreToolUse hook invokes
+`hooks/pretooluse_guard.py` by RELATIVE path, so a `cd` that leaks out
+of a subshell kills every later tool call in that session. Root cause
+of the cluster is protocol_armA_v2.md itself: v2's step-3 shallow-fetch
+recipe (`git init` + `git fetch` + `git checkout FETCH_HEAD`) reads
+naturally as `cd task-dir && git init && ...` — the exact leak — where
+v1's plain `git clone` needed no cd. A v2-only, systematic session
+killer is a mechanics defect biasing against SA-v2, so step 3 is
+reworded to an explicit cd-free `git -C` command sequence (both on
+`bench5/base` and the arm branch). The treatment and the provenance
+rule are unchanged; no graded result is affected (all three bricked
+sessions correctly delivered nothing rather than an unverified patch —
+noted as an integrity observation).
+
+The underlying environment trap (relative hook path) is deliberately
+left in place for fidelity with the original arms, which ran with it;
+it should be fixed engine-side AFTER the run (system-repair candidate:
+hook command should use an absolute/`$CLAUDE_PROJECT_DIR` path).
+Filing the issue is deferred until the run completes so the hourly ADW
+task doesn't start git surgery on this tree mid-run.
+
+## 2026-08-04 02:47 UTC — SA-v2 mechanics fix 2: hazard warning in kickoff
+
+A 4th session died on r002 AFTER the protocol fix — this one leaked cwd
+via an ad-hoc `cd <path> && go version` typed after a clean `git -C`
+clone (state commit ce68dd7). The trap is not protocol-induced; the
+subject model types `cd dir && cmd` reflexively. Buried warnings (state
+file, protocol) are read but not reliably applied, so the rule is now
+stated in the kickoff message itself, which the session reads before
+typing anything: both triggers updated 02:46 UTC (same text) with a
+SANDBOX HAZARD paragraph — never `cd` outside a parenthesized subshell,
+use `git -C`/absolute paths for every command. Treatment unchanged
+(kickoff is orchestration mechanics; the scaffolding treatment remains
+protocol + task + carried state). The durable engine-side fix
+(hook path robustness in `.claude/settings.json`) must land on `main` —
+cloud sessions load hook config from the default branch at startup, so
+an arm-branch edit cannot take effect; deferred to the post-run
+system-repair with cross-platform testing (Windows hook-command env
+expansion unverified), rather than rushed mid-run.
+
+Session ledger so far (fires vs deliveries): 8 fires 23:09–02:39, 1
+result (r001, 00:09 fire), 4 r002 lockouts with state-only commits, 2
+early no-output fires (23:09/23:39, cause unknown — consistent with the
+same trap hitting before any push), 02:39 fire in flight at this
+writing. Every lockout delivered nothing rather than an unverified
+patch (integrity observation).
+
+## 2026-08-04 05:15 UTC — 5th lockout; durable hook fix offered as PR #111
+
+r002 (03:30) and r003 (03:51) and r004 (04:22) delivered; then a 5th
+cwd lockout on r005 (6dbc2e8, 04:47) — this session had the hardened
+kickoff, so prompt-level warnings alone leave a ~1/3 session-waste
+rate. Escalation attempted and results:
+
+- Trigger API silently strips a `branch` field on the repo source, so
+  sessions cannot be started on the arm branch (which would have let
+  the arm branch's own settings.json apply). Kickoff counts updated.
+- Durable fix prepared as **PR #111** (`fix/hook-launcher-cwd-robust`
+  off `main`): hook commands launch their scripts via an inline-python
+  shim that pins cwd to CLAUDE_PROJECT_DIR (fallback '.', old
+  behavior). Verified under sh and cmd, foreign cwd and repo root,
+  allow/deny paths, var unset; 398 tests green. Merging is the owner's
+  human-only gate. Mid-run merge is analyzed as unbiased for pass
+  rates (a bricked session delivers nothing and the rank is retried;
+  the trap costs sessions/wall-clock only) — if merged, the merge time
+  is recorded here and session-count/wall-clock process metrics before
+  vs after are reported separately.
+
+## 2026-08-04 ~12:40 UTC — INTERIM grades, first 16 SA-v2 results (labeled interim; final analysis only at 60/60)
+
+Incremental grading started once 16 results were in (official harness,
+serial per-patch, `out_sa_v2`; per-patch pull + rmi). Verdicts
+recomputed from required-test sets as always
+(`results/main_armA_sonnet5_v2_grades.json`, will be extended as more
+ranks land):
+
+- **SA-v2: 6/16 PASS** (r001, r003, r004, r008, r011, r013). All 10
+  fails are genuine near-misses with the patch applied and the suite
+  running (r007 983/985, r010 288/291, r014 38/42, r015 75/82; the
+  rest are small required sets 0/1..0/5). Zero `no output.json`.
+- Same 16 ranks, SB (bare continuous): 13/16 (fails r002, r005, r011).
+  Paired discordants on this prefix: SB-pass/SA-v2-fail = 8
+  (r006,7,9,10,12,14,15,16); SA-v2-pass/SB-fail = 1 (r011).
+  Direction: **scaffolding effect for sonnet is running strongly
+  NEGATIVE with the answer-key channel closed** — the original SA's
+  +16.7pp appears to have been cheat-driven. Not conclusive until
+  60/60 + audit.
+- Artifact checks run before believing the signal: (a) every fail is a
+  near-miss, not an apply failure; (b) the `git diff`
+  staged/untracked-capture hypothesis tested by diffing each failing
+  patch's file list vs gold — subjects DO emit new-file diffs where
+  they created files (r006, r016), the only missing gold-new files are
+  ansible changelogs/fragments (test-irrelevant), and r007 covers all
+  gold files yet fails 2/985 on substance. Depressed rate looks real,
+  not a capture artifact.
+- Grading order in this batch was instance-id-sorted, not rank order;
+  the 16 graded = all results present at batch start (r001–r016).
+  These interim grades will be re-verified against final branch state
+  (blob hashes) in the post-run audit, since one session (r010) has
+  already amended a pushed patch once.
+
+## 2026-08-05 — SA-v2 COMPLETE, AUDITED, ANALYZED (seed 20260803)
+
+**Run:** 60/60 delivered on `bench5/armA-sonnet5-v2` (launch 2026-08-03
+23:09 UTC → final push 2026-08-05 ~12:20 UTC, ~37h wall on the 30-min
+dual-trigger cadence). Both v2 triggers disabled after completion. All
+60 grades genuine (parsed test lists; the one `no output.json`
+infra-fail, r018, was re-run to a genuine grade; zero infra-fails
+counted). Grading was incremental in 8 batches; every graded patch
+byte-verified against final branch state (the two mid-run patch
+amendments, r010/r022, predated their grading).
+
+**Mandatory audit (RERUN-SA-HANDOFF step 4):**
+- Detection grep (review-note pattern) over all 60 metas: **0 flags**.
+  Broader keyword scan: 1 hit (r018) — compliance language ("no hidden
+  tests or upstream fix were consulted"), adjudicated false positive.
+- Fix-SHA sweep of the entire final branch tree: zero matches.
+- Final `state_armA.md` read end to end: process lessons only, no
+  provenance content; explicitly reasons INSIDE the rule several times.
+- Gold-overlap screen (>80% of gold added-lines present in submission):
+  9 ranks flagged {r001 .96, r013 1.0, r016 .93, r027 .95, r034 .94,
+  r036 .87, r038 .87, r044 .81, r053 .85}. Similarity-only — no meta
+  describes retrieval, and 4 of the 9 FAILED grading (copying gold
+  passes), consistent with honest convergence on requirement texts that
+  enumerate the change. Per the handoff's escalation rule these are
+  compiled for OWNER adjudication, not self-cleared; the v2 numbers
+  below are provisional pending that ruling.
+
+**Environment confound, quantified (must be reported with the result):**
+the cwd/hook trap plagued arm A the whole run (state file lists ~15+
+killed sessions through r058). Later bricked sessions learned to
+deliver anyway via GitHub MCP file-pushes, hand-building diffs from
+Read output — i.e. WITHOUT executable verification. Meta
+self-assessments (honest throughout — an H4 data point in scaffolding's
+favor) identify ~13 results delivered under handicap (hook-brick or
+env-blocked verification: r010,11,14,15,19,22,23,26,28,31,34,43,47):
+3/13 pass (23%) vs 26/47 (55.3%) among clean deliveries. The trap hits
+arm A asymmetrically (60 fresh sessions = 60 chances to trip; arm B's
+one session never tripped). Even the clean-delivery subset sits ~25pp
+below SB, so the negative effect is not explained by the trap — but the
+point estimate below overstates it by some share. PR #111 (unmerged
+during the run) remains the engine-side fix.
+
+**Pre-registered v2 analysis (`tools/analyze_main_v2.py`, seed
+20260803; full matrix `results/main_matrix_v2.json`):**
+
+| cell | pass | rate |
+|------|------|------|
+| SA-original | 58/60 | **disqualified (answer-key retrieval)** |
+| SA-v2 (sonnet, scaffolded) | 29/60 | 48.3% |
+| OA (opus, scaffolded) | 59/60 | 98.3% |
+| SB (sonnet, bare cont.) | 48/60 | 80.0% |
+| OB (opus, bare cont.) | 52/60 | 86.7% |
+
+- **Sonnet scaffolding effect: −31.7pp**, McNemar A-only 4 vs B-only
+  23, exact **p = 0.0003** — significant, NEGATIVE.
+- **Opus scaffolding effect: +11.7pp**, 8 vs 1, p = 0.0391 (unchanged).
+- **Interaction (ΔSonnet − ΔOpus): −43.3pp, bootstrap 95% CI
+  [−61.7, −25.0]** — significant, OPPOSITE of the pre-registered H1
+  direction.
+- Low-probe subset (n=21): SA-v2 9/21, sonnet McNemar p = 0.0215,
+  interaction −47.6pp CI [−85.7, −9.5] — the reversal is not a
+  memorization artifact.
+- Process: SA-v2 median 35.0m/instance in-session (vs original-SA
+  20.0m — honest work is slower than retrieval; SB 9.4m).
+
+**Verdict vs pre-registration:** H1 is now answered with the opposite
+sign: on this hardest-stratum battery, fresh-session scaffolding HELPED
+the frontier model (+11.7pp, significant) and HURT the smaller model
+(−31.7pp, significant); H2 (SA > SB) is rejected in reverse. The
+original run's sonnet "scaffolding gain" was an artifact of answer-key
+retrieval. Honest caveats: (a) the cwd-trap handicap inflates the
+negative magnitude by some share (clean-subset gap ~−25pp); (b) 9
+similarity flags await owner adjudication; (c) one cell of one round —
+treatment-specific (60-line carried state, fresh sessions), not a
+general claim about all scaffolding. H4 note: v2 metas disclosed their
+handicaps plainly; no fabrication found in the scaffolded cell.

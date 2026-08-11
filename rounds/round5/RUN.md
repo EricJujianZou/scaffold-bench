@@ -618,7 +618,9 @@ amendments, r010/r022, predated their grading).
   passes), consistent with honest convergence on requirement texts that
   enumerate the change. Per the handoff's escalation rule these are
   compiled for OWNER adjudication, not self-cleared; the v2 numbers
-  below are provisional pending that ruling.
+  below are provisional pending that ruling. **Ruled 2026-08-11: all 9
+  cleared as honest convergence (adjudication packet in the source
+  repo); the v2 numbers are final.**
 
 **Environment confound, quantified (must be reported with the result):**
 the cwd/hook trap plagued arm A the whole run (state file lists ~15+
@@ -664,8 +666,9 @@ the frontier model (+11.7pp, significant) and HURT the smaller model
 (−31.7pp, significant); H2 (SA > SB) is rejected in reverse. The
 original run's sonnet "scaffolding gain" was an artifact of answer-key
 retrieval. Honest caveats: (a) the cwd-trap handicap inflates the
-negative magnitude by some share (clean-subset gap ~−25pp); (b) 9
-similarity flags await owner adjudication; (c) one cell of one round —
+negative magnitude by some share (clean-subset gap ~−25pp); (b) the 9
+similarity flags were ruled honest convergence (owner, 2026-08-11);
+(c) one cell of one round —
 treatment-specific (60-line carried state, fresh sessions), not a
 general claim about all scaffolding. H4 note: v2 metas disclosed their
 handicaps plainly; no fabrication found in the scaffolded cell.

@@ -49,6 +49,7 @@ ROUNDS = [
     ("Round 4", "50 fresh interlocking tasks", "Opus 5", (50, 50), (50, 50), "null at the ceiling", None),
     ("Round 5", "60 hardest SWE-bench Pro instances", "Opus 5", (59, 60), (52, 60), "scaffolding wins, p=0.039", None),
     ("Round 5", "same battery", "Sonnet 5", (58, 60), (48, 60), "arm A found the answer key", "A"),
+    ("Round 5", "same battery, rerun, answer key withheld", "Sonnet 5", (29, 60), (48, 60), "scaffolding loses, p=0.0003", None),
 ]
 
 # round, armA % of self-reports inconsistent with git, armB %
@@ -136,8 +137,8 @@ PAD = 44
 
 STATS = [
     ("5", "rounds, every one", "pre-registered before the run", "ink"),
-    ("520", "graded arm-outcomes", "across rounds 1-5", "ink"),
-    ("2 of 5", "rounds won by the scaffold,", "and 1 cell caught cheating", "a"),
+    ("580", "graded arm-outcomes", "across rounds 1-5 and the rerun", "ink"),
+    ("−43.3pp", "the interaction, sign reversed:", "helped Opus 5, hurt Sonnet 5", "a"),
 ]
 
 
@@ -149,14 +150,11 @@ def hero(t):
     o.append(text(PAD, 116, "Do frontier coding agents still need the scaffolding we build around them?",
                   t["ink2"], 15.5))
 
-    o.append(f'<rect x="{W - PAD - 156}" y="52" width="156" height="28" rx="14" '
+    o.append(f'<rect x="{W - PAD - 168}" y="52" width="168" height="28" rx="14" '
              f'fill="{t["surface"]}" stroke="{t["border"]}"/>')
-    # the one element that loops: it is a live-status dot for the sonnet rerun,
-    # so it reads as meaning rather than as decoration
-    o.append(f'<circle cx="{W - PAD - 138}" cy="66" r="4" fill="{t["b"]}">'
-             f'<animate attributeName="opacity" values="1;0.25;1" dur="2.4s" '
-             f'repeatCount="indefinite"/></circle>')
-    o.append(text(W - PAD - 126, 70, "clean rerun live", t["ink2"], 12, MONO))
+    # static now: the rerun is graded, so nothing on the page claims to be live
+    o.append(f'<circle cx="{W - PAD - 150}" cy="66" r="4" fill="{t["b"]}"/>')
+    o.append(text(W - PAD - 138, 70, "rerun graded clean", t["ink2"], 12, MONO))
 
     inner = W - PAD * 2
     cw = (inner - 28) / 3
@@ -230,7 +228,7 @@ def rounds(t):
     o.append(text(PAD + 16, y + 22, "The disqualification", t["ink"], 13, MONO, "600"))
     o.append(text(PAD + 196, y + 22, "Sonnet arm A retrieved each task's upstream fix commit instead of solving it.",
                   t["ink2"], 11.5))
-    o.append(text(PAD + 16, y + 40, "That cell reruns with the answer key withheld. The 2x2 interaction publishes when it grades.",
+    o.append(text(PAD + 16, y + 40, "The rerun withheld the answer key. The 58 fell to 29, and the pre-registered interaction reversed.",
                   t["ink3"], 11))
     return wrap(W, H, "".join(o), t)
 
@@ -302,7 +300,7 @@ def social(t):
     # the verdict strip fills the right half, which the title block leaves empty
     strip = [("R1", "tie", t["ink3"]), ("R2", "scaffolding wins", t["a"]),
              ("R3", "flipped", t["ink3"]), ("R4", "null at the ceiling", t["b"]),
-             ("R5", "wins, one cell disqualified", t["a"])]
+             ("R5", "helped Opus, hurt Sonnet", t["a"])]
     sx = 852
     o.append(f'<line x1="{sx - 28}" y1="112" x2="{sx - 28}" y2="284" stroke="{t["border"]}"/>')
     for i, (label, verdict, col) in enumerate(strip):

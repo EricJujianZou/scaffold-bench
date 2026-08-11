@@ -107,7 +107,7 @@ Headline numbers (details in `RUN.md` § 2026-08-05):
 - McNemar sonnet A-vs-B: 4-vs-23 discordant, **p=0.0003, NEGATIVE**; opus 8-vs-1, p=0.0391
 - **Interaction (ΔS−ΔO): −43.3pp, bootstrap 95% CI [−61.7, −25.0] — significant, sign REVERSED vs pre-registered H1**
 - Low-probe (n=21): SA-v2 9/21; sonnet p=0.0215; interaction −47.6pp CI [−85.7, −9.5]
-- Audit: meta grep 0/60 · fix-SHA sweep zero · state file clean · graded-vs-final byte check clean · 9 gold-overlap similarity flags **pending owner adjudication** · ~13 results delivered under cwd-trap/env handicap (3 pass) — confound quantified in RUN.md
+- Audit: meta grep 0/60 · fix-SHA sweep zero · state file clean · graded-vs-final byte check clean · 9 gold-overlap similarity flags **ruled honest convergence (owner, 2026-08-11)** · ~13 results delivered under cwd-trap/env handicap (3 pass) — confound quantified in RUN.md
 - Process: SA-v2 median 35.0m/instance (honest work ≫ original SA's 20.0m); ~37h wall on 30-min dual triggers
 
 ## Known gaps / open items

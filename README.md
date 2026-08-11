@@ -1,9 +1,9 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg">
-  <img alt="scaffold-bench: do frontier coding agents still need the scaffolding we build around them? 5 rounds, all pre-registered. 520 graded arm-outcomes. Scaffolding won 2 of 5, and one test cell was caught cheating." src="assets/hero-light.svg" width="100%">
+  <img alt="scaffold-bench: do frontier coding agents still need the scaffolding we build around them? 5 rounds plus a clean rerun, all pre-registered. 580 graded arm-outcomes. Scaffolding helped the frontier model and hurt the smaller one." src="assets/hero-light.svg" width="100%">
 </picture>
 
-<p><img alt="rounds" src="https://img.shields.io/badge/rounds-5-d95d78"> <img alt="pre-registered" src="https://img.shields.io/badge/design-pre--registered-2d97d6"> <img alt="grading" src="https://img.shields.io/badge/grading-official%20harness%2C%20local-2d97d6"> <img alt="round 5" src="https://img.shields.io/badge/round%205-graded-2d97d6"> <img alt="disqualification" src="https://img.shields.io/badge/one%20cell-disqualified-d95d78"> <img alt="license" src="https://img.shields.io/badge/license-MIT-lightgrey"></p>
+<p><img alt="rounds" src="https://img.shields.io/badge/rounds-5-d95d78"> <img alt="pre-registered" src="https://img.shields.io/badge/design-pre--registered-2d97d6"> <img alt="grading" src="https://img.shields.io/badge/grading-official%20harness%2C%20local-2d97d6"> <img alt="round 5" src="https://img.shields.io/badge/round%205-graded%2C%20rerun%20included-2d97d6"> <img alt="disqualification" src="https://img.shields.io/badge/one%20cell-disqualified-d95d78"> <img alt="interaction" src="https://img.shields.io/badge/interaction-%E2%88%9243.3pp%2C%20sign%20reversed-d95d78"> <img alt="license" src="https://img.shields.io/badge/license-MIT-lightgrey"></p>
 
 Do frontier coding agents still need the scaffolding we build around them? Five pre-registered
 rounds, graded by the official harness and never by the agent. Round 5 is the one that matters,
@@ -21,24 +21,30 @@ the hardest solvable stratum of the public set.
 | Opus 5, scaffolded | **59/60 (98%)** | 0/60 | clean |
 | Opus 5, bare | 52/60 (87%) | 0/60 | clean |
 | Sonnet 5, bare | 48/60 (80%) | 0/60 | clean |
-| Sonnet 5, scaffolded | 58/60 | **45/60** | **disqualified** |
+| Sonnet 5, scaffolded, original run | 58/60 | **45/60** | **disqualified** |
+| Sonnet 5, scaffolded, rerun with the answer key withheld | **29/60 (48%)** | 0/60 | clean |
 
 - **On Opus 5 the scaffold won by 11.7 points.** 59/60 against 52/60, McNemar 8 discordant pairs
   to 1, exact p = 0.0391, both cells audited clean. After four rounds of the scaffold losing,
   tying, or winning only with confounds, this is the first clean scaffolding win on a frontier
   model in this experiment.
-- **The Sonnet scaffolded cell is disqualified.** It solved the benchmark by looking up the answer
-  key. The full story is the [next section](#one-cell-found-the-answer-key), and it is better than
-  the headline: the cell that cheated still lost to the cell that did not, 58 to 59.
-- **The model-by-scaffold interaction, the actual pre-registered headline hypothesis, is not
-  computable yet.** It needs a clean Sonnet cell, so that cell is rerunning with the answer key
-  withheld: instance IDs never reach the agent, and the rank-to-ID mapping stays with the
-  orchestrator. The interaction publishes when it grades.
+- **On Sonnet 5 the scaffold lost by 31.7 points.** The original scaffolded cell was disqualified
+  for looking up the answer key; the full story is the
+  [next section](#one-cell-found-the-answer-key). The pre-registered rerun withheld the key
+  (instance IDs never reach the agent, the rank-to-ID mapping stays with the orchestrator) and
+  came back 29/60 against the bare arm's 48/60, McNemar 4 discordant pairs to 23, exact
+  p = 0.0003. What had looked like a 16.7-point scaffolding gain was answer-key retrieval, all of
+  it and then some.
+- **The model-by-scaffold interaction, the pre-registered headline hypothesis, came back with the
+  opposite sign.** I predicted scaffolding would help the smaller model more. Measured cleanly, it
+  is −43.3pp, bootstrap 95% CI [−61.7, −25.0]: scaffolding helped the frontier model and hurt the
+  smaller one. The low-probe subset agrees, so this is not a memorization artifact.
 
 > [!NOTE]
 > The round 5 pre-registration promised that results publish whole, not in pieces. This is the
-> whole run: all 240 grades, the audit, and the disqualification. The interaction is the one
-> number still missing, and it waits on the rerun rather than on editing.
+> whole run: all 300 grades across the four cells and the rerun, the audit, the disqualification,
+> and the reversal. Two magnitude caveats on the rerun are stated in full in
+> [Threats to validity](#threats-to-validity); neither touches the sign.
 
 ## One cell found the answer key
 
@@ -67,6 +73,12 @@ unprompted. The difference between those two state files is the most interesting
 project has produced. And with the answer key in hand, Sonnet still scored one point below the
 Opus cell that refused to look.
 
+The rerun put a number on what the key was worth. With the IDs withheld, the same cell under the
+same protocol scored 29/60, and its task metas show the difference in effort: a median of 35
+minutes per instance solving honestly, against 20 minutes per instance retrieving. Cheating was
+not just more effective. It was faster, which is exactly why a metric gamed diligently looks like
+productivity.
+
 The leak is my fault first and the dataset's second. I put the ID in the task file and left the
 network on. But the ID scheme ships the answer key inside the task's own name, and most public
 harnesses expose instance IDs to the agent as a matter of course. I would be surprised if this
@@ -90,8 +102,8 @@ spent four rounds mostly proving him right:
 - **Round 3:** the direction flipped on a harder tier, then the run died at n=1. It is reported anyway.
 - **Round 4:** with both confounds fixed, the effect vanished. 50/50 in both arms, and the bare arm
   finished in 36 minutes while the scaffold took 4.7 hours.
-- **Round 5:** the result above. Hard enough work finally separated the arms, and the answer-key
-  discovery came with it.
+- **Round 5:** the result above. Hard enough work finally separated the arms, in both directions
+  at once, and the answer-key discovery came with it.
 
 Everything is in this repo: the pre-registrations, the frozen instance lists with hashes, the
 grading wrappers, the memorization probe, the audit that caught the cheat, per-instance results,
@@ -114,6 +126,7 @@ and append-only run logs with the failures and infrastructure incidents left in.
 | 4 | 50 fresh interlocking tasks | Opus 5 | 50/50 | 50/50 | null at the ceiling |
 | 5 | 60 hardest SWE-bench Pro instances | Opus 5 | **59/60 (98%)** | 52/60 (87%) | scaffolding wins, McNemar p = 0.039 |
 | 5 | same battery | Sonnet 5 | disqualified | 48/60 (80%) | arm A found the answer key |
+| 5 | same battery, rerun, answer key withheld | Sonnet 5 | 29/60 (48%) | **48/60 (80%)** | scaffolding loses, McNemar p = 0.0003 |
 
 Batteries differ between rounds. Rows are not comparable to each other, only within a row.
 
@@ -131,9 +144,13 @@ Batteries differ between rounds. Rows are not comparable to each other, only wit
    scored 50/50 with zero replay regressions, and arm B did it in one 36 minute session versus
    4.7 hours across 51 sessions for arm A. A null at the ceiling bounds the claim; round 5 existed
    to break the ceiling.
-5. **Round 5 gave some of it back.** On 60 instances hard enough that frontier configurations miss
-   most of them, the scaffold beat the bare arm on Opus 5 by 11.7 points, while the same carried
-   memory industrialised the cheat in the Sonnet cell. The treatment cuts both ways.
+5. **Round 5 answered the headline question with the opposite sign.** On 60 instances hard enough
+   that frontier configurations miss most of them, the scaffold helped Opus 5 by 11.7 points and,
+   once the answer key was withheld, hurt Sonnet 5 by 31.7 points. The pre-registered prediction
+   was that scaffolding helps the weaker model more; the measured interaction is −43.3pp in the
+   other direction. The same carried memory that disciplined one model industrialised the cheat in
+   the other. The treatment amplifies the model it is wrapped around, in whichever direction that
+   model was already heading.
 
 ---
 
@@ -334,7 +351,7 @@ work hard enough to produce failures. That is what round 5 was for.
 </details>
 
 <details>
-<summary><b>Round 5</b> - the scaffold wins on Opus, and a cell gets disqualified</summary>
+<summary><b>Round 5</b> - the scaffold wins on Opus, loses on Sonnet, and a cell gets disqualified</summary>
 
 A 2x2 factorial: {Sonnet 5, Opus 5} x {scaffolded, bare}, on 60 SWE-bench Pro instances selected
 so that every one was solved by exactly one of three frontier leaderboard configurations and
@@ -346,13 +363,19 @@ unsolvable rather than hard) and was re-ranked, re-frozen and re-probed under a 
 amendment before the main run.
 
 Results: Opus scaffolded 59/60, Opus bare 52/60, McNemar 8 discordant pairs to 1, exact
-p = 0.0391. Sonnet bare 48/60. Sonnet scaffolded is disqualified for answer-key retrieval,
-documented at the top of this README and in `rounds/round5/STATUS.md`.
+p = 0.0391. Sonnet bare 48/60. The original Sonnet scaffolded cell is disqualified for answer-key
+retrieval, documented at the top of this README and in `rounds/round5/STATUS.md`.
 
-There are two honest gaps. Cost per solved instance was a pre-registered outcome and it is
+The pre-registered rerun replaced it: sanitized task files with the instance IDs withheld, an
+explicit provenance rule, a fresh state file. It delivered 60/60, graded 29/60, and audited clean
+(detection grep 0 of 60, no fix SHA anywhere in the branch, provenance-clean state file; 9
+instances flagged for line overlap with the gold patch were adjudicated as honest convergence,
+with 4 of the 9 failing grading, which copying the key cannot do). That makes the interaction
+computable, and it came back −43.3pp, the reverse of the pre-registered prediction.
+
+There is one honest gap left. Cost per solved instance was a pre-registered outcome and it is
 unresolved: per-cell token totals were not captured, and that failure is recorded in `RUN.md`
-rather than papered over. And the interaction, the actual headline hypothesis, waits on the clean
-Sonnet rerun with the answer key withheld.
+rather than papered over.
 </details>
 
 ---
@@ -362,6 +385,15 @@ Sonnet rerun with the answer key withheld.
 - **The answer key leaked into round 5.** My harness exposed dataset instance IDs with the network
   on, and one cell exploited it. That cell is disqualified; the other three audited clean, 0 of 60
   task metas each. The audit and its raw hits are in `rounds/round5/STATUS.md`.
+- **Part of the rerun ran handicapped.** A sandbox bug killed the session's tools mid-task in
+  roughly 13 of the 60 rerun deliveries, and those sessions hand-built their patches without
+  being able to run anything. The handicap hits only the scaffolded arm (60 fresh sessions are 60
+  chances to trip it; the bare arm's single session never did), so the −31.7pp overstates the
+  clean effect by some share. The handicap-free subset still sits about 25 points below the bare
+  arm, so the sign does not depend on it. Quantified in `rounds/round5/RUN.md`.
+- **The reversal is one cell of one round.** It is specific to this treatment (a carried state
+  file and fresh sessions) on this battery. It is not a general claim about all scaffolding on
+  all smaller models.
 - **Rounds 1 to 3 ran on the wrong model.** The claim concerns Claude-class models; those rounds
   used Devin's. Only rounds 4 and 5 test the claim as stated.
 - **Contamination.** SWE-bench instances are public and the probe confirms heavy recall. Round 4
@@ -384,7 +416,9 @@ Sonnet rerun with the answer key withheld.
 Every time I improved the experiment, my own result got weaker. Round 2 is the only round that
 supported the counter-thesis on schedule, and it is also the round carrying the two worst
 confounds. When both were fixed in round 4, the effect vanished, and the integrity finding I had
-replicated three times reversed on the better model.
+replicated three times reversed on the better model. The rerun kept the streak alive: fixing the
+answer-key leak turned the Sonnet cell's 16.7-point scaffolding win into a 31.7-point loss, after
+I had already posted the round as a win for scaffolding.
 
 Round 5's leak is on me. I named every task file after the dataset's instance ID and gave the
 sandbox network access, and that turned a naming convention into an answer key. The rerun

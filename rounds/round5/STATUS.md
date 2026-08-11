@@ -1,6 +1,15 @@
-# Round 5, STATUS: SA-v2 rerun complete — interaction REVERSED, pending final adjudication
+# Round 5, STATUS: SA-v2 rerun complete — interaction REVERSED, adjudicated final
 
-Last updated 2026-08-05. **Read this before citing any round-5 number.**
+Last updated 2026-08-11. **Read this before citing any round-5 number.**
+
+## 2026-08-11 addendum: the 9 similarity flags are ruled
+
+The owner ruled all 9 gold-overlap flags honest convergence (evidence:
+detection grep 0/60, no retrieval language in any meta, no fix-SHA in
+the branch tree, provenance-clean state file, 4 of 9 flagged instances
+failed grading, requirement texts enumerate the change file-by-file;
+full packet in the source repo). The v2 numbers below are final. The
+cwd-trap handicap caveat still applies to the magnitude, not the sign.
 
 ## 2026-08-05 addendum: the SA rerun is complete and analyzed
 
@@ -24,7 +33,8 @@ Two caveats before publishing hard numbers (details in `RUN.md`
 deliveries (hand-built diffs, unverifiable in-session) — the clean-delivery
 subset still runs ~25pp below SB, so the sign is robust but the magnitude is
 inflated by some share; (2) 9 gold-overlap similarity flags (no retrieval
-language in any meta; 4 of 9 failed grading) await owner adjudication.
+language in any meta; 4 of 9 failed grading) — ruled honest convergence
+by the owner, 2026-08-11 (see the addendum at the top of this file).
 Audit otherwise clean: detection grep 0/60, fix-SHA sweep of the branch
 zero, carried state file provenance-clean, graded-vs-final byte check clean.
 
